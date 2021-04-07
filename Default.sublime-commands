@@ -1,0 +1,29 @@
+[
+  {
+    "caption": "Easy Template: New Template",
+    "command": "es_tmpl_create_template"
+  },
+  {
+    "caption": "Easy Template: Edit Template",
+    "command": "es_tmpl_edit_template"
+  },
+  {
+    "caption": "Easy Template: Remove Template",
+    "command": "es_tmpl_remove_template"
+  },
+  {
+    "caption": "Easy Template: Create From Template Relative to Current View",
+    "command": "es_tmpl_new_file",
+    "args": {
+      "type_folder": "current"
+    }
+  },
+  {
+    "caption": "Easy Template: Create From Template Relative to Project Root",
+    "command": "es_tmpl_new_file",
+    "args": {
+      "type_folder": "root"
+    }
+  }
+]
+
