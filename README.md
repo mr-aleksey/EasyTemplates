@@ -29,3 +29,9 @@ Templates can be used via `Side Bar right click → Create From Template` or via
 
 Add `{open}` to file names to automatically open these files on template usage. For example `index{open}.js`, `{name}{open}.js`.
 
+### Edit or Remove Template
+
+Open the Command Palette to:
+
+* `Easy Templates: Edit Template`
+* `Easy Templates: Remove Template`

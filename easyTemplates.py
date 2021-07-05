@@ -1,13 +1,15 @@
 import os
+import re
 import subprocess
 import shutil
 import json
 import sublime
 import sublime_plugin
+from .nameTransform import preparationEnteredName, replaceNameParameter
 
 
 def plugin_loaded():
-  checkingFoldersWithTemplates()
+  checkingFolderWithTemplates()
   createSideBar()
 
 
@@ -39,7 +41,7 @@ def getTemplateNameList():
   return templateNameList
 
 
-def checkingFoldersWithTemplates():
+def checkingFolderWithTemplates():
   isTemplatesFolderExist = os.path.exists(getTemplatesFolderPath())
 
   if not isTemplatesFolderExist:
@@ -126,9 +128,10 @@ def enterFileName(template_name, name, path):
 
 
 def createFilesByTemplate(template_name, user_entered_name, path):
+  name_params = preparationEnteredName(user_entered_name)
+
   template_folder = getTemplatesFolderPath() + '/' + template_name
-  template_files = os.listdir(template_folder)
-  template_files = prettyFolderList(template_files)
+  template_files = prettyFolderList(os.listdir(template_folder))
 
   if len(template_files) == 0:
     sublime.error_message('Template is empty')
@@ -138,19 +141,16 @@ def createFilesByTemplate(template_name, user_entered_name, path):
     item_path = template_folder + '/' + item
 
     if os.path.isfile(item_path):
-      createNewFile(item_path, path, user_entered_name)
+      createNewFile(item_path, path, name_params)
 
     if os.path.isdir(item_path):
-      folder_name = item
-      index_folder_name_tag = item.lower().find('{name}')
-      if index_folder_name_tag >= 0:
-        folder_name = folder_name[:index_folder_name_tag] + user_entered_name + folder_name[index_folder_name_tag+6:]
+      folder_name = replaceNameParameter(item, name_params)
 
       os.mkdir(path + '/' + folder_name)
       createFilesByTemplate(template_name + '/' + item, user_entered_name, path + '/' + folder_name)
 
 
-def createNewFile(template_file_path, new_file_location, user_entered_name):
+def createNewFile(template_file_path, new_file_location, name_params):
   file_name = os.path.basename(template_file_path)
   is_open_file = False
   
@@ -159,20 +159,22 @@ def createNewFile(template_file_path, new_file_location, user_entered_name):
       is_open_file = True
       file_name = file_name[:index_open_tag] + '' + file_name[index_open_tag+6:]
 
-  index_name_tag = file_name.lower().find('{name}')
-  if index_name_tag >= 0:
-    file_name = file_name[:index_name_tag] + user_entered_name + file_name[index_name_tag+6:]
+  file_name = replaceNameParameter(file_name, name_params)
+  # index_name_tag = file_name.lower().find('{name}')
+  # if index_name_tag >= 0:
+  #   file_name = file_name[:index_name_tag] + user_entered_name + file_name[index_name_tag+6:]
 
   tmpl = open(template_file_path)
   new_file_content = tmpl.read()
   tmpl.close()
 
-  while True:
-    index_content_tag = new_file_content.lower().find('{name}')
-    if index_content_tag == -1:
-      break
-    else:
-      new_file_content = new_file_content[:index_content_tag] + user_entered_name + new_file_content[index_content_tag+6:]
+  new_file_content = replaceNameParameter(new_file_content, name_params)
+  # while True:
+  #   index_content_tag = new_file_content.lower().find('{name}')
+  #   if index_content_tag == -1:
+  #     break
+  #   else:
+  #     new_file_content = new_file_content[:index_content_tag] + user_entered_name + new_file_content[index_content_tag+6:]
 
   new_file_path = new_file_location + '/' + file_name
   new_file = open(new_file_path, 'w')
@@ -248,4 +250,3 @@ def getPathForNewFiles(self, type_folder):
           return pf
   else:
     return folders[0]
-
